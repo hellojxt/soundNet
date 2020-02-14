@@ -1,0 +1,5 @@
+result/
+*.npz
+*.weights
+.vscode/
+__pycache__
