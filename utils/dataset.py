@@ -26,14 +26,19 @@ class HourGlassDataset(data.Dataset):
 
     def __getitem__(self, idx):
 
+        vox = self.vox[idx]
+
         target = self.target[idx].reshape(16,16,16, -1)
-        
+
+        freq = self.freq[idx]
+        freq = freq.reshape(10,-1).mean(-1)
+
         item = {
-            'vox':      torch.as_tensor(self.vox[idx], dtype=torch.float32),
+            'vox':      torch.as_tensor(vox, dtype=torch.float32),
                         # x_size * y_size * z_size
             'target':   torch.as_tensor(target, dtype=torch.float32)/255,
                          # x_size * y_size * z_size * 3 * res
-            'freq':     torch.as_tensor(self.freq[idx], dtype=torch.float32)
+            'freq':     torch.as_tensor(freq, dtype=torch.float32)
         }
 
         item = rotate(item)
