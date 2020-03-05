@@ -70,7 +70,7 @@ def main(OutputDir, NetName):
                 if best_loss is None or best_loss > loss:
                     best_loss = loss
                     best_model_wts = copy.deepcopy(model.state_dict())
-
+    writer.close()
     torch.save(best_model_wts, os.path.join(root_dir, NetName+'_best.weights'))
 
 if __name__ == "__main__":

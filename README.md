@@ -6,5 +6,17 @@
 
 ## Train
 
-`python train_envelope.py
+`python train.py
+tensorboard --logdir=result/test_envelope
+tensorboard --logdir=result/test_frequency
+`
+
+## Test
+
+`python test.py
+tensorboard --logdir=result/test --samples_per_plugin images=0
+`
+
+## Evaluation
+`python evaluation
 `

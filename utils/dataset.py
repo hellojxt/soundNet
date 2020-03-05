@@ -6,7 +6,7 @@ import numpy as np
 from utils import helper
 import random
 
-def rotate(x,axis = [0,1]):
+def rotate(x,axis = [0,2]):
     k = random.randint(0,3)
     for i in x:
         if x[i].dim() < 2:

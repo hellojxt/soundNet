@@ -73,31 +73,6 @@ class EnvelopeNet(nn.Module):
         x = x[:,:,p1,p2,p3]
         return self.end_line(x)
 
-    # def forward(self, data, loss_fun):
-    #     inputs = data['vox'].cuda()
-    #     target = data['target'].cuda()
-    #     freq = data['freq'].cuda()
-    #     freq = freq.view(freq.size(0),self.res,helper.resolution//self.res).mean(-1)
-    #     x = inputs
-    #     out = []
-    #     index = (target != 0).any(-1)
-    #     target = target[index]
-
-    #     x,g = self.predict(x)
-
-    #     x = x.permute(0,2,3,4,1)[index]
-    #     x = self.end_line(x)
-
-    #     out.append(inputs)
-    #     out.append(index)
-    #     out.append(freq)
-    #     out.append(g)
-    #     out.append(x)
-        
-    #     loss1 = loss_fun(x,target)
-    #     loss2 = loss_fun(g,freq)
-    #     loss =  loss1 + loss2
-    #     return out,target,loss,loss1
 
 
 class FrequencyNet(nn.Module):
@@ -140,39 +115,4 @@ class FrequencyNet(nn.Module):
         return x
 
   
-# def show_spectrum(inputs, targets, img_name,dim = None):
-#     import random 
-     
-#     index = np.argwhere(inputs[1].cpu().numpy()==True)
-#     voxs = nn.MaxPool3d(2)(inputs[0]).cpu().numpy().reshape(-1,16,16,16)
-#     plt.figure(figsize=(15,15))
-#     width = 4
-#     for i,idx in enumerate(random.sample(range(len(targets)),5)):
-#         plt.subplot(5,width,i*width + 1)
-#         plt.plot(targets[idx].cpu().numpy())
-#         plt.subplot(5,width,i*width + 2)
-#         plt.plot(inputs[-1][idx].cpu().numpy())
-#         colors = np.empty(voxs[0].shape, dtype=object)
-#         colors[...] = '#FFD65D05'
-#         colors[(*index[idx][1:],)] = 'red'
-#         voxs_ = np.zeros_like(voxs[index[idx][0]])
-#         voxs_[(*index[idx][1:],)] = 1
-#         ax = plt.subplot(5,width,i*width + 4,projection='3d')
-#         ax.voxels(voxs[index[idx][0]],facecolors=colors, edgecolors='#0f0f0f10')
-#         ax.voxels(voxs_,facecolors=colors, edgecolors='#0f0f0f10')
-#     plt.savefig(img_name)
-#     plt.clf()
-#     plt.close()
-#     i = 0
-#     plt.figure(figsize=(10,6))
-#     for f,g in zip(inputs[2].cpu().numpy(), inputs[3].cpu().numpy()):
-#         plt.subplot(5,2,i*2 + 1)
-#         plt.plot(f)
-#         plt.subplot(5,2,i*2 + 2)
-#         plt.plot(g)
-#         i += 1
-#         if i == 4:
-#             break
-#     plt.savefig(img_name+'rate.png')
-#     plt.clf()
-#     plt.close()
+
