@@ -1,9 +1,10 @@
 import numpy as np
 from glumpy import app, gl, gloo, data, log, glm
 from glumpy.transforms import Trackball, Position
-import soundmodel,player,random,os,sys
+import random,os,sys
 import matplotlib.pyplot as plt
 import cv2
+from utils import player,soundmodel
 
 def load_shader(path):
     with open(path + '.vert', 'r') as f:
@@ -130,6 +131,6 @@ class GUI(object):
         
 
 if __name__ == "__main__":
-	name1 = 'datasetGreat\\bowl_0005.off.ply.ply'
-	name2 = 'dataset\\train\\bowl_0005.off.ply'
+	name1 = 'originData\\datasetGreat\\bowl_0005.off.ply.ply'
+	name2 = 'originData\\dataset\\train\\bowl_0005.off.ply'
 	GUI(name2)
