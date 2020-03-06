@@ -13,7 +13,7 @@ from tqdm import tqdm
 from utils.dataset import HourGlassDataset
 from model.net import EnvelopeNet,FrequencyNet
 
-def main(OutputDir, NetName):
+def main(OutputDir, NetName, MaxEpoch):
     BATCH_SIZE = 16
     filename = 'all_clean.npz'
     trainset = HourGlassDataset('dataset/train/{}'.format(filename))
@@ -23,17 +23,17 @@ def main(OutputDir, NetName):
         'test':DataLoader(testset, batch_size=BATCH_SIZE,shuffle=True, num_workers=0,drop_last=True),
     }
     loss_fun = nn.MSELoss()
-    root_dir = os.path.join('result',OutputDir)
+    root_dir = os.path.join('result',OutputDir + str(MaxEpoch))
     writer = SummaryWriter(root_dir)
     if NetName == 'envelope':
         model = EnvelopeNet().cuda()
     else:
         model = FrequencyNet().cuda()
     optimizer = optim.Adam(model.parameters(),0.001)
-    scheduler = lr_scheduler.StepLR(optimizer, step_size=10, gamma=0.7)
+    scheduler = lr_scheduler.StepLR(optimizer, step_size=7, gamma=0.7)
     best_loss = None
 
-    for epoch in tqdm(range(20)):
+    for epoch in tqdm(range(MaxEpoch)):
         for phase in ['train', 'test']:
             losses = []
             for i, data in enumerate(loader[phase]):
@@ -74,7 +74,7 @@ def main(OutputDir, NetName):
     torch.save(best_model_wts, os.path.join(root_dir, NetName+'_best.weights'))
 
 if __name__ == "__main__":
-    main('test_frequency','frequency')
-    main('test_envelope','envelope')
+    main('frequency','frequency',150)
+    main('envelope','envelope',150)
     
 

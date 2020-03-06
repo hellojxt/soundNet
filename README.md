@@ -11,9 +11,9 @@ tensorboard --logdir=result/test_envelope
 tensorboard --logdir=result/test_frequency
 `
 
-## Test
+## Check 
 
-`python test.py
+`python check.py
 tensorboard --logdir=result/test --samples_per_plugin images=0
 `
 
