@@ -3,3 +3,4 @@ result/
 *.weights
 .vscode/
 __pycache__
+originData/

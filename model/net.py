@@ -5,7 +5,7 @@ import torch.nn.functional as F
 
 from utils import helper
 
-from model.layer import *
+from .layer import *
 
 
 class EnvelopeNet(nn.Module):
