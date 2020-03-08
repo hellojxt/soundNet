@@ -68,7 +68,8 @@ class EnvelopeNet(nn.Module):
         x = x.permute(0,2,3,4,1)[index]
         return self.end_line(x)
 
-    def select(self, x, p1, p2, p3):
+    def select(self, x, coord):
+        p1,p2,p3 = coord[0],coord[1],coord[2]
         x = self.body(x)
         x = x[:,:,p1,p2,p3]
         return self.end_line(x)

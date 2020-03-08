@@ -4,7 +4,8 @@ from glumpy.transforms import Trackball, Position
 import random,os,sys
 import matplotlib.pyplot as plt
 import cv2
-from utils import player,soundmodel
+from utils import player
+import soundmodel
 
 def load_shader(path):
     with open(path + '.vert', 'r') as f:
@@ -14,7 +15,7 @@ def load_shader(path):
     return gloo.Program(vertex, fragment)
 
 class GUI(object):
-	def __init__(self, filename):
+	def __init__(self, model):
 		self.mesh_shader = load_shader('shader/mesh')
 		trackball = Trackball(Position("position"))
 		self.mesh_shader['transform'] = trackball
@@ -27,17 +28,16 @@ class GUI(object):
 		self.mouse = None
 		self.player = player.PlayerWorld()
 
-
-		self.load_mesh(filename)
+		self.model = model
+		self.load_mesh()
 		app.run()
 
 	def click(self, index):
-		a,w,c = self.model.click(index,100)
+		a,w,c = self.model.click(index,1)
 		self.player.play(a,w,c)
 
-	def load_mesh(self,filename):
+	def load_mesh(self):
 		mat = 4
-		self.model = soundmodel.mesh(filename, mat)
 		vertices = self.model.vertices
 		faces = self.model.faces
 		normals = self.model.noramls
@@ -131,6 +131,5 @@ class GUI(object):
         
 
 if __name__ == "__main__":
-	name1 = 'originData\\datasetGreat\\bowl_0005.off.ply.ply'
-	name2 = 'originData\\dataset\\train\\bowl_0005.off.ply'
-	GUI(name2)
+	model = soundmodel.voxMesh(int(sys.argv[1]),deep=True)
+	GUI(model)

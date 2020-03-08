@@ -15,24 +15,32 @@ def osc_process(buffer, pipe):
         amp,freq,c,index = pipe.recv()
         amp,freq,c = map(np.array, [amp,freq,c])
         N = len(amp)
+        amp = amp*(np.random.randint(2, size=50)*2 - 1)
         print('modes_num:{}'.format(N))
+        print('max amp:{}'.format(amp.max()))
         t = 0.
         frame = np.arange(BUFFERSIZE)
         while t < 2 :
             frame += BUFFERSIZE
-            t += BUFFERSIZE*1.0 / BITRATE
             #print(t)
             data = np.zeros_like(frame).astype(np.float32)
             for i in range(N):
                 damp = np.exp(-0.5*c[i]*frame/BITRATE)
                 sin = np.sin(freq[i]*2*math.pi*frame/BITRATE)
                 data += amp[i]*damp*sin
-            buffer[index*BUFFERSIZE:(index+1)*BUFFERSIZE] += data
+
+            if t == 0:
+                k = np.abs(data).max()*1.2
+                if k < 1:
+                    k = 1
+
+            t += BUFFERSIZE*1.0 / BITRATE
+            buffer[index*BUFFERSIZE:(index+1)*BUFFERSIZE] += data / k
             index = (index + 1) % NUM
-            #print(t)
-            #print(c[0])
-            #print(np.exp(-0.5*c[0]*t))
-        #print('osc finished')
+
+            
+            
+           
 
 class PlayerWorld(object):
     def __init__(self, buffertime = 10):
