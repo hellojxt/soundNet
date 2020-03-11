@@ -32,19 +32,47 @@ def hz2index(f):
 def index2hz(i):
     bark = z_min + (i+0.5)*spacing
     return bark2hz(bark)
+p_0 = 0.01
+k_0 = 0.5
+def amp2spl(a):
+    return k_0*np.log10(a/p_0)
 
-def compress(amp, freq):
+def spl2amp(db):
+    if db == 0:
+        return 0
+    return 10**(db/k_0)*p_0
+    
+def compress(amp, freq, c=None):
     lst = np.zeros(resolution)
+    amp = np.abs(amp)
+    if amp.max() == 0:
+        return np.nan
     for i,a in enumerate(amp):
         idx = hz2index(freq[i])
         if idx < resolution and idx >= 0:
-            lst[idx] += abs(a)
+            lst[idx] += a
+    for i,a in enumerate(lst):
+        if a > 0:
+            lst[i] = amp2spl(a)
+    lst = lst - lst.max() + 1
+    lst[lst < 0] = 0
+    return lst
+
+def freq_compress(freq):
+    lst = np.zeros(resolution)
+    for f in freq:
+        idx = hz2index(f)
+        if idx < resolution and idx >= 0:
+            lst[idx] = 1
     return lst
 
 def decompress(lst, alpha=2E-6, beta=60.0):
     fs = np.array([index2hz(i) for i in range(resolution)])
     c = 2.*(1 - np.sqrt(1 - alpha*(beta + alpha * (fs*2*math.pi)**2)) )/alpha
-    return lst, fs, c
+    a = np.array([spl2amp(lst[i]) for i in range(resolution)])
+    a = np.nan_to_num(a)
+    return a, fs, c
+
 
 BITRATE=44100
 
