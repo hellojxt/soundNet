@@ -31,7 +31,7 @@ class HourGlassDataset(data.Dataset):
         target = self.target[idx].reshape(16,16,16, -1)
 
         freq = self.freq[idx]
-        freq = freq.reshape(10,-1).mean(-1)
+        freq = freq.reshape(8,-1).mean(-1)
 
         item = {
             'vox':      torch.as_tensor(vox, dtype=torch.float32),
@@ -41,6 +41,6 @@ class HourGlassDataset(data.Dataset):
             'freq':     torch.as_tensor(freq, dtype=torch.float32)
         }
 
-        item = rotate(item)
+        #item = rotate(item)
 
         return item

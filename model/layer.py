@@ -67,3 +67,4 @@ class FC(nn.Module):
 
     def forward(self, x):
         return self.bn(self.active(self.nn(x)))
+

@@ -11,7 +11,7 @@ import copy
 import random
 from tqdm import tqdm
 from utils.dataset import HourGlassDataset
-from model.net import EnvelopeNet,FrequencyNet
+from model.netconv import EnvelopeNet,FrequencyNet
 
 def main(OutputDir, NetName, MaxEpoch):
     BATCH_SIZE = 16

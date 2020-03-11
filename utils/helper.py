@@ -20,9 +20,9 @@ def bark2hz(z):
     f = 600*np.sinh(z/6)
     return f
 
-resolution = 50
+resolution = 64
 z_min = hz2bark(50)
-z_max = hz2bark(7000)
+z_max = hz2bark(10000)
 spacing = (z_max - z_min)/resolution
 
 def hz2index(f):

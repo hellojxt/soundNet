@@ -30,9 +30,9 @@ def main(OutputDir, NetName, MaxEpoch):
     else:
         model = FrequencyNet().cuda()
     optimizer = optim.Adam(model.parameters(),0.001)
-    scheduler = lr_scheduler.StepLR(optimizer, step_size=7, gamma=0.7)
+    scheduler = lr_scheduler.StepLR(optimizer, step_size=5, gamma=0.7)
     best_loss = None
-
+    torch.backends.cudnn.benchmark = True
     for epoch in tqdm(range(MaxEpoch)):
         for phase in ['train', 'test']:
             losses = []
@@ -63,18 +63,20 @@ def main(OutputDir, NetName, MaxEpoch):
 
             if phase == 'train':
                 scheduler.step()
-
+        
             loss = np.array(losses).mean()
             writer.add_scalar('loss/'+phase, loss, epoch)
             if phase == 'test':
                 if best_loss is None or best_loss > loss:
                     best_loss = loss
                     best_model_wts = copy.deepcopy(model.state_dict())
+        break
     writer.close()
     torch.save(best_model_wts, os.path.join(root_dir, NetName+'_best.weights'))
 
 if __name__ == "__main__":
-    main('frequency','frequency',150)
-    main('envelope','envelope',150)
+    main('envelope','envelope',50)
+    #main('frequency','frequency',50)
+    
     
 

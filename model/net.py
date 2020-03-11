@@ -80,7 +80,7 @@ class FrequencyNet(nn.Module):
     def __init__(self):
         super().__init__()
         self.inplanes = 8
-        self.res = 10
+        self.res = 8
         self.layer1 = nn.Sequential(*[
                             nn.Conv3d(1, self.inplanes, kernel_size=3, stride=2, padding=1,bias=False),
                             nn.BatchNorm3d(self.inplanes),
