@@ -11,7 +11,7 @@ import copy
 import random
 from tqdm import tqdm
 from utils.dataset import HourGlassDataset
-from model.net import EnvelopeNet,FrequencyNet
+from model.netconv import EnvelopeNet,FrequencyNet
 import matplotlib.pyplot as plt
 from mpl_toolkits.mplot3d import Axes3D
 import shutil
@@ -42,15 +42,15 @@ def plot_lists(data_list, title_list):
         ax.set_title(title_list[idx])
     return fig
 
-def main(net_name):
-    filename = 'all_clean.npz'
+def main(writer, net_name,log_dir):
+    filename = 'all.npz'
     testset = HourGlassDataset('dataset/test/{}'.format(filename))
     test_loader = DataLoader(testset, batch_size=1,shuffle=True, num_workers=0,drop_last=True)
     if net_name == 'envelope':
         model = EnvelopeNet().cuda()
     else:
         model = FrequencyNet().cuda()
-    model.load_state_dict(torch.load(os.path.join('result','test_'+net_name, net_name + '_best.weights')))
+    model.load_state_dict(torch.load(os.path.join(log_dir, net_name + '_best.weights')))
     model.eval()
     with torch.set_grad_enabled(False):
         for i, data in enumerate(test_loader):
@@ -60,11 +60,12 @@ def main(net_name):
                 index = (targets != 0).any(-1)
                 targets = targets[index]
                 outputs = model(inputs, index)
+                targets = targets.view(targets.size(0),3,-1)
                 idx = random.randrange(len(targets))
 
                 inputs = inputs[0].cpu().numpy()
-                targets = targets[idx].cpu().numpy()[:50]
-                outputs = outputs[idx].cpu().numpy()[:50]
+                targets = targets[idx].cpu().numpy()[0,:]
+                outputs = outputs[idx].cpu().numpy()[0,:]
                 
                     
             else:
@@ -79,12 +80,10 @@ def main(net_name):
             data_list = [inputs, outputs, targets]
             title_list =  ['input', 'output', 'target']
             writer.add_figure(net_name, plot_lists(data_list,title_list),i)
-            if i > 10:
+            if i > 20:
                 break
 
-log_dir = os.path.join('result','test')
-shutil.rmtree(log_dir)
-writer = SummaryWriter(log_dir)
+
 
 def check_all():
     main(writer, 'envelope')
@@ -103,6 +102,7 @@ def check_vox():
             break
         
 if __name__ == "__main__":
-    check_vox()
-    writer.close()
+    log_dir = os.path.join('result','envelope40')
+    writer = SummaryWriter(log_dir)
+    main(writer,'envelope',log_dir)
     

@@ -1,4 +1,6 @@
+import torch
 import torch.nn as nn
+import torch.nn.functional as F
 
 class Residual(nn.Module):
     def __init__(self, input_channels, out_channels,stride = 1,use_bn = True):
@@ -68,3 +70,55 @@ class FC(nn.Module):
     def forward(self, x):
         return self.bn(self.active(self.nn(x)))
 
+
+class BasicBlock(nn.Module):
+    def __init__(self, in_planes, planes, stride=1, deconv=None):
+        super(BasicBlock, self).__init__()
+
+        self.conv1 = nn.Conv1d(in_planes, planes, kernel_size=3, stride=stride, padding=1, bias=False)
+        self.conv2 = nn.Conv1d(planes, planes, kernel_size=3, stride=1, padding=1, bias=False)
+        self.shortcut = nn.Sequential()
+       
+        self.bn1 = nn.BatchNorm1d(planes)
+        self.bn2 = nn.BatchNorm1d(planes)
+
+        if stride != 1 or in_planes != planes:
+            self.shortcut = nn.Sequential(
+                nn.Conv1d(in_planes, planes, kernel_size=1, stride=stride, bias=False),
+                nn.BatchNorm1d(planes)
+            )
+    def forward(self, x):
+        out = F.relu(self.bn1(self.conv1(x)))
+        out = self.bn2(self.conv2(out))
+        out += self.shortcut(x)
+        out = F.relu(out)
+        return out
+
+class Bottleneck(nn.Module):
+    expansion = 2
+    def __init__(self, in_planes, out_planes):
+        super(Bottleneck, self).__init__()
+        planes = out_planes // self.expansion
+        self.bn1 = nn.BatchNorm1d(planes)
+        self.bn2 = nn.BatchNorm1d(planes)
+        self.bn3 = nn.BatchNorm1d(out_planes)
+        self.conv1 = nn.Conv1d(in_planes, planes, kernel_size=1, bias=False)
+        self.conv2 = nn.Conv1d(planes, planes, kernel_size=3, stride=1, padding=1, bias=False)
+        self.conv3 = nn.Conv1d(planes, out_planes, kernel_size=1, bias=False)
+
+        self.shortcut = nn.Sequential()
+
+        if in_planes != out_planes:
+            self.shortcut = nn.Sequential(
+                nn.Conv1d(in_planes, out_planes, kernel_size=1, stride=1, bias=False),
+                nn.BatchNorm1d(out_planes)
+            )
+        
+
+    def forward(self, x):
+        out = F.relu(self.bn1(self.conv1(x)))
+        out = F.relu(self.bn2(self.conv2(out)))
+        out = self.bn3(self.conv3(out))
+        out += self.shortcut(x)
+        out = F.relu(out)
+        return out

@@ -13,15 +13,7 @@ from tqdm import tqdm
 from utils.dataset import HourGlassDataset
 from model.net import EnvelopeNet,FrequencyNet
 
-def main(OutputDir, NetName, MaxEpoch):
-    BATCH_SIZE = 16
-    filename = 'all.npz'
-    trainset = HourGlassDataset('dataset/train/{}'.format(filename))
-    testset = HourGlassDataset('dataset/test/{}'.format(filename))
-    loader = {
-        'train':DataLoader(trainset, batch_size=BATCH_SIZE,shuffle=True, num_workers=0,drop_last=True),
-        'test':DataLoader(testset, batch_size=BATCH_SIZE,shuffle=True, num_workers=0,drop_last=True),
-    }
+def main(OutputDir, NetName, MaxEpoch, loader):
     loss_fun = nn.MSELoss()
     root_dir = os.path.join('result',OutputDir + str(MaxEpoch))
     writer = SummaryWriter(root_dir)
@@ -30,7 +22,9 @@ def main(OutputDir, NetName, MaxEpoch):
     else:
         model = FrequencyNet().cuda()
     optimizer = optim.Adam(model.parameters(),0.001)
+    #optimizer = optim.SGD(model.parameters(), lr=0.01, momentum=0.9)
     scheduler = lr_scheduler.StepLR(optimizer, step_size=5, gamma=0.7)
+    
     best_loss = None
     torch.backends.cudnn.benchmark = True
     for epoch in tqdm(range(MaxEpoch)):
@@ -70,13 +64,20 @@ def main(OutputDir, NetName, MaxEpoch):
                 if best_loss is None or best_loss > loss:
                     best_loss = loss
                     best_model_wts = copy.deepcopy(model.state_dict())
-        break
     writer.close()
     torch.save(best_model_wts, os.path.join(root_dir, NetName+'_best.weights'))
 
 if __name__ == "__main__":
-    main('envelope','envelope',50)
-    #main('frequency','frequency',50)
+    filename = 'all.npz'
+    BATCH_SIZE = 16
+    trainset = HourGlassDataset('dataset/train/{}'.format(filename))
+    testset = HourGlassDataset('dataset/test/{}'.format(filename))
+    loader = {
+        'train':DataLoader(trainset, batch_size=BATCH_SIZE,shuffle=True,drop_last=True),
+        'test':DataLoader(testset, batch_size=BATCH_SIZE,shuffle=True,drop_last=True),
+    }
+    main('envelope','envelope',100,loader)
+    #main('frequency','frequency',150,loader)
     
     
 

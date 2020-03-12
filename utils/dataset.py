@@ -41,6 +41,6 @@ class HourGlassDataset(data.Dataset):
             'freq':     torch.as_tensor(freq, dtype=torch.float32)
         }
 
-        #item = rotate(item)
+        item = rotate(item)
 
         return item
