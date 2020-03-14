@@ -15,23 +15,21 @@ def rotate(x,axis = [0,2]):
     return x
 
 class HourGlassDataset(data.Dataset):
-    def __init__(self, npz_file):
+    def __init__(self, npz_file, res):
         data = np.load(npz_file)
         self.vox = data['vox']
         self.target = data['target']
         self.freq = data['freq']
-        
+        self.res = res
     def __len__(self):
         return len(self.vox)
 
     def __getitem__(self, idx):
 
         vox = self.vox[idx]
-
         target = self.target[idx].reshape(16,16,16, -1)
-
         freq = self.freq[idx]
-        freq = freq.reshape(8,-1).mean(-1)
+        freq = freq.reshape(self.res,-1).mean(-1)
 
         item = {
             'vox':      torch.as_tensor(vox, dtype=torch.float32),
