@@ -23,8 +23,7 @@ def main(NetName, cuda, lr):
     if 'frequency' in NetName:
         net_type = 'frequency'
         root_dir = os.path.join('result',NetName + '_res_{}'.format(FREQ_RES))
-        res= int(np.log(FREQ_RES)/np.log(2) - 2)
-        model = getattr(net,NetName)(res).to(device)
+        model = getattr(net,NetName)(FREQ_RES).to(device)
 
     writer = SummaryWriter(root_dir)
     loss_fun = nn.MSELoss()
@@ -82,12 +81,12 @@ def main(NetName, cuda, lr):
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description='Train envelope net or frequency net.')
-    parser.add_argument('--net', type=str, help='class name of the network')
-    parser.add_argument('--res', type=int, default=8, help='resolution for frequency')
+    parser.add_argument('--net', type=str, help='Class name of the network')
+    parser.add_argument('--res', type=int, default=8, help='Resolution for frequency')
     parser.add_argument('--cuda', type=int, default=0, help='GPU index')
-    parser.add_argument('--epoch', type=int, default=100, help='max epoch')
-    parser.add_argument('--bsize', type=int, default=16, help='batch size')
-    parser.add_argument('--lr', type=float, default=0.01, help='learning rate')
+    parser.add_argument('--epoch', type=int, default=100, help='Max epoch')
+    parser.add_argument('--bsize', type=int, default=16, help='Batch size')
+    parser.add_argument('--lr', type=float, default=0.01, help='Learning rate')
     
     args = parser.parse_args()
 
@@ -99,8 +98,8 @@ if __name__ == "__main__":
     testset = HourGlassDataset('dataset/test/all_smooth.npz',FREQ_RES)
 
     loader = {
-        'train':DataLoader(trainset, batch_size=BATCH_SIZE,shuffle=True,drop_last=True,num_workers=8),
-        'test':DataLoader(testset, batch_size=BATCH_SIZE,shuffle=True,drop_last=True,num_workers=8),
+        'train':DataLoader(trainset, batch_size=BATCH_SIZE,shuffle=True,drop_last=True,num_workers=0),
+        'test':DataLoader(testset, batch_size=BATCH_SIZE,shuffle=True,drop_last=True,num_workers=0),
     }
     main(args.net, args.cuda, args.lr)
     

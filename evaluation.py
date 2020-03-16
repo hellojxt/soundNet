@@ -7,7 +7,7 @@ import copy
 import random
 from tqdm import tqdm
 from utils.dataset import HourGlassDataset
-from model.net import EnvelopeNet,FrequencyNet
+import model
 import matplotlib.pyplot as plt
 
 def diff_band_point2set(p,i,lst,band_width):
@@ -25,11 +25,11 @@ def diff_band_point2set(p,i,lst,band_width):
 def diff_band_set2set(list1, list2, band_width):
     dist_all = 0
     for i,p in enumerate(list1):
-        dist_all += p*diff_band_point2set(p,i,list2,band_width)
+        dist_all += diff_band_point2set(p,i,list2,band_width)
     for i,p in enumerate(list2):
-        dist_all += p*diff_band_point2set(p,i,list1,band_width)
+        dist_all += diff_band_point2set(p,i,list1,band_width)
 
-    return dist_all / (sum(list1) + sum(list1))
+    return dist_all / (len(list1) + len(list1))
 
 def merge_random_frequency(envelope, freq):
     k = len(envelope) // len(freq)
@@ -41,7 +41,6 @@ def merge_random_frequency(envelope, freq):
         for idx in idxs:
             j = idx + i*k
             new_envelope[j] = envelope[j]
-
     return new_envelope
 
 def plot_lists(data_list, title_list):
@@ -73,9 +72,11 @@ def evaluation_random_sample(outputs_envelope, outputs_frequency):
     plt.show()
 
 def main():
-    filename = 'all_clean.npz'
+    filename = 'all.npz'
     testset = HourGlassDataset('dataset/test/{}'.format(filename))
-    test_loader = DataLoader(testset, batch_size=1,shuffle=True, num_workers=0,drop_last=True)
+    test_loader = DataLoader(testset, batch_size=1,shuffle=True, num_workers=8)
+
+
     model_envelope = EnvelopeNet().cuda()
     model_frequency = FrequencyNet().cuda()
     model_envelope.load_state_dict(torch.load(os.path.join('result','test_envelope', 'envelope_best.weights')))
@@ -83,7 +84,6 @@ def main():
     model_frequency.load_state_dict(torch.load(os.path.join('result','test_frequency', 'frequency_best.weights')))
     model_frequency.eval()
 
-    scores_without_sample = []
     scores_sample = []
     scores_random = []
 

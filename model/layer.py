@@ -74,7 +74,7 @@ class FC(nn.Module):
 
 class Bottleneck(nn.Module):
     expansion = 2
-    def __init__(self, in_planes, out_planes, dilation = 1, active=nn.ReLU()):
+    def __init__(self, in_planes, out_planes, stride = 1, active=nn.ReLU()):
         super(Bottleneck, self).__init__()
         self.active = active
         planes = out_planes // self.expansion
@@ -82,17 +82,34 @@ class Bottleneck(nn.Module):
         self.bn2 = nn.BatchNorm1d(planes)
         self.bn3 = nn.BatchNorm1d(out_planes)
         self.conv1 = nn.Conv1d(in_planes, planes, kernel_size=1, bias=False)
-        self.conv2 = nn.Conv1d(planes, planes, kernel_size=3, padding=dilation, dilation=dilation, bias=False)
+        if stride == 1:
+            self.conv2 = nn.Conv1d(planes, planes, kernel_size=3, padding=1, bias=False)
+        else:
+            self.conv2 = nn.ConvTranspose1d(planes, planes,
+                                            kernel_size=3,
+                                            stride=stride, bias=False,
+                                            padding=1,
+                                            output_padding=1)
+
         self.conv3 = nn.Conv1d(planes, out_planes, kernel_size=1, bias=False)
 
         self.shortcut = nn.Sequential()
 
         if in_planes != out_planes:
-            self.shortcut = nn.Sequential(
-                nn.Conv1d(in_planes, out_planes, kernel_size=1, stride=1, bias=False),
-                nn.BatchNorm1d(out_planes)
-            )
-        
+            if stride == 1:
+                self.shortcut = nn.Sequential(
+                    nn.Conv1d(in_planes, out_planes, kernel_size=1, stride=1, bias=False),
+                    nn.BatchNorm1d(out_planes)
+                )
+            else:
+                self.shortcut = nn.Sequential(
+                    nn.ConvTranspose1d(in_planes, 
+                               out_planes,
+                               kernel_size=1, stride=stride,
+                               bias=False, output_padding=1),
+                    nn.BatchNorm1d(out_planes)
+                )
+            
 
     def forward(self, x):
         out = self.active(self.bn1(self.conv1(x)))
