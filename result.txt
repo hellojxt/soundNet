@@ -1,0 +1,77 @@
+100%|██████████████████████████████████████████████████████████████████████████████████████████████████████████████████| 2463/2463 [30:40<00:00,  1.34it/s] 
+100%|███████████████████████████████████████████████████████████████████████████████████████████████████████████████████| 4/4 [10:23:31<00:00, 9352.79s/it] 
+            name   l2_loss  mean_frequency    kmeans  our_metric
+0  simple_random  0.260117        0.444616  0.250001    0.146524
+1       baseline  0.146436        0.193662  0.249765    0.069268
+2         voxnet  0.114798        0.105802  0.515488    0.047434
+3           ours  0.084856        0.061258  0.705069    0.032725
+
+
+       name   l2_loss  mean_frequency    kmeans  our_metric
+simple_random  0.26        0.444  25.0%    0.147
+baseline  0.14        0.193  25.0%    0.068
+ours  0.08        0.060  70.6%    0.032
+voxnet  0.11        0.085  57.3%    0.043
+single_match  0.11        0.074  63.8%    0.042
+single        0.05        0.046  72.9%    0.042
+single_match  0.10        0.060  67.7%    0.038
+
+
+\begin{CJK*}{UTF8}{gbsn}
+
+
+\section{附录：网络的详细参数}
+
+\textbf{Frequency Generator}
+我们的frequency generator 的详细参数如下表\ref{fg_para},其中Bottleneck是Resnet中的基本组件，3D Bottleneck用3D Conv来降采样，1D Bottleneck用1D Transpose Conv来升采样。
+为了降低网络学习frequency feature的难度，我们尝试预测不同分辨率的frequency feature。在frequency feature 分辨率较低时，虽然网络学习的难度降低，但是还原成原分辨率的frequency feature时必定引入误差，且分辨率越低，误差越大。因此end layer的output size $k$的可以调节，我们测试了不同的分辨率$k$下网络的结果。
+\begin{table}[h]
+\begin{tabular}{clll}
+\toprule[1.5pt]
+ \multicolumn{2}{c}{\bf layer name}  & \bf output size  & \bf type            \\ \midrule[1.0pt]
+\multirow{6}*{encoder} &layer1      & 32*16*16*16  & Conv3d          \\ \cline{2-4}
+&layer2 & 32*16*16*16  & 3D Bottleneck*2    \\ \cline{2-4}
+&down layer1 & 64*8*8*8     & 3D Bottleneck*2    \\ \cline{2-4}
+&down layer2 & 128*4*4*4    & 3D Bottleneck*2    \\ \cline{2-4}
+&down layer3   & 256*2*2*2    & 3D Bottleneck*2 \\ \cline{2-4}
+&mid layer & 256*1*1*1    & average pooling      \\ \midrule[1.0pt]
+\multirow{4}*{decoder}&up layer1   & 128*2 & 1D Bottleneck*2 \\ \cline{2-4}
+&up layer2   & 64*4 & 1D Bottleneck*2 \\ \cline{2-4}
+&up layer3   & 32*8 & 1D Bottleneck*2 \\ \cline{2-4}
+&end layer   & 1*k & ConvTranspose1d \\
+\bottomrule[1.25pt]
+\end{tabular}
+\bigskip
+\caption{frequency generator的详细参数}
+\label{fg_para}
+\end{table}
+\begin{table}[h]
+\bigskip
+\begin{tabular}{clll}
+\toprule[1.5pt]
+ \multicolumn{2}{c}{\bf layer name}   & \bf output size  & \bf type            \\ \midrule[1.0pt]
+\multirow{9}*{encoder} & layer1      & 32*16*16*16  & Conv3d          \\ \cline{2-4}
+&layer2 & 32*16*16*16  & 3D Bottleneck*2    \\ \cline{2-4}
+&down layer1 & 64*8*8*8     & 3D Bottleneck*2    \\ \cline{2-4}
+&down layer2 & 128*4*4*4    & 3D Bottleneck*2    \\ \cline{2-4}
+&up layer1   & 128*8*8*8    & ConvTranspose3d \\ \cline{2-4}
+&jump layer1 & 128*8*8*8    & 3D Bottleneck      \\ \cline{2-4}
+&up layer2   & 128*16*16*16 & ConvTranspose3d \\ \cline{2-4}
+&jump layer2 & 128*16*16*16 & 3D Bottleneck      \\ \cline{2-4}
+&mid layer   & 128*16*16*16 & 3D Bottleneck      \\  \midrule[1.0pt]
+\multirow{4}*{decoder} &up layer1   & 64*2 & 1D Bottleneck*2 \\ \cline{2-4}
+&up layer2   & 32*4 & 1D Bottleneck*2      \\ \cline{2-4}
+&up layer3   & 16*8 & 1D Bottleneck*2      \\ \cline{2-4}
+&end layer   & 1*64 & ConvTranspose1d      \\ 
+\bottomrule[1.25pt]
+\end{tabular}
+\bigskip
+\caption{amplitude generator的详细参数}
+\label{ag_para}
+\end{table}
+\textbf{Amplitude Generator} amplitude generator 的详细参数如下表\ref{ag_para}。其中 jump layer1将down layer1的输出通过3D Bottleneck与up layer1的输出相加，jump layer2将layer2的输出通过3D Bottleneck与up layer2的输出相加。
+
+encoder部分输出128通道的16*16*16的特征图，将原输入以0.5倍率缩小，就能在该特征图中取出对应顶点的特征。顶点的特征作为decoder的输入，amplitude feature作为decoder的输出。
+
+训练时，将所有数据集中的顶点相应的特征取出来，通过decoder后计算frequency feature的L2 loss。
+\end{CJK*}

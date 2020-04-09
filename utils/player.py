@@ -15,7 +15,7 @@ def osc_process(buffer, pipe):
         amp,freq,c,index = pipe.recv()
         amp,freq,c = map(np.array, [amp,freq,c])
         N = len(amp)
-        amp = amp*(np.random.randint(2, size=50)*2 - 1)
+        amp = amp*(np.random.randint(2, size=64)*2 - 1)
         print('modes_num:{}'.format(N))
         print('max amp:{}'.format(amp.max()))
         t = 0.

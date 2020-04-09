@@ -129,3 +129,16 @@ class frequency_conv(nn.Module):
         x = x.view(x.size(0),-1,1)
         x = self.end_line(x)
         return x.view(x.size(0),-1)
+
+
+class voxnet(nn.Module):
+    def __init__(self):
+        super().__init__()
+        self.body = frequency_encoder()
+        self.end_line = nn.Linear(256,40)
+
+    def forward(self,x):
+        x = self.body(x)
+        x = x.view(x.size(0),-1)
+        return self.end_line(x)
+
